@@ -1,0 +1,175 @@
+{
+  "name": "SkyWorld Default World",
+  "version": "2.0.0",
+  "description": "SkyWorld v2.0 için varsayılan dünya konfigürasyonu",
+  "author": "MiniMax Agent",
+  "created": "2025-12-17T20:12:02.000Z",
+  "settings": {
+    "world": {
+      "seed": "skyworld_default",
+      "size": {
+        "width": 1000,
+        "height": 256,
+        "depth": 1000
+      },
+      "chunkSize": 16,
+      "seaLevel": 32,
+      "maxHeight": 80
+    },
+    "generation": {
+      "terrain": {
+        "noiseScale": 0.01,
+        "noiseOctaves": 4,
+        "noisePersistence": 0.5,
+        "noiseLacunarity": 2.0
+      },
+      "biomes": {
+        "enabled": true,
+        "size": 128,
+        "transition": 16
+      },
+      "ores": {
+        "coal": { "chance": 0.05, "minHeight": 5, "maxHeight": 50 },
+        "iron": { "chance": 0.03, "minHeight": 10, "maxHeight": 40 },
+        "gold": { "chance": 0.01, "minHeight": 15, "maxHeight": 30 }
+      },
+      "structures": {
+        "trees": { "chance": 0.008, "minHeight": 4, "maxHeight": 8 },
+        "caves": { "chance": 0.02, "radius": 3 }
+      }
+    },
+    "physics": {
+      "gravity": -9.81,
+      "friction": 0.8,
+      "jumpForce": 8,
+      "maxSpeed": 5.6
+    },
+    "audio": {
+      "masterVolume": 0.5,
+      "musicVolume": 0.3,
+      "sfxVolume": 0.7,
+      "ambientEnabled": true
+    },
+    "graphics": {
+      "quality": "medium",
+      "shadows": true,
+      "maxRenderDistance": 8,
+      "particles": true
+    }
+  },
+  "player": {
+    "position": {
+      "x": 0,
+      "y": 70,
+      "z": 0
+    },
+    "inventory": [
+      {
+        "slot": 0,
+        "type": "GRASS",
+        "count": 32
+      },
+      {
+        "slot": 1,
+        "type": "DIRT",
+        "count": 64
+      },
+      {
+        "slot": 2,
+        "type": "STONE",
+        "count": 32
+      },
+      {
+        "slot": 3,
+        "type": "WOOD",
+        "count": 16
+      },
+      {
+        "slot": 4,
+        "type": "LEAVES",
+        "count": 8
+      }
+    ],
+    "selectedSlot": 0,
+    "stats": {
+      "playTime": 0,
+      "blocksPlaced": 0,
+      "blocksBroken": 0,
+      "distanceTraveled": 0
+    }
+  },
+  "worldData": {
+    "spawn": {
+      "x": 0,
+      "y": 70,
+      "z": 0
+    },
+    "time": {
+      "dayTime": 0.5,
+      "dayLength": 240,
+      "paused": false
+    },
+    "weather": {
+      "type": "clear",
+      "intensity": 0,
+      "duration": 0
+    },
+    "chunks": {},
+    "structures": []
+  },
+  "achievements": [
+    {
+      "id": "first_block",
+      "name": "İlk Blok",
+      "description": "İlk bloğunuzu yerleştirin",
+      "completed": false,
+      "completedAt": null
+    },
+    {
+      "id": "builder",
+      "name": "İnşaatçı",
+      "description": "100 blok yerleştirin",
+      "completed": false,
+      "completedAt": null
+    },
+    {
+      "id": "miner",
+      "name": "Madenci",
+      "description": "50 blok kırın",
+      "completed": false,
+      "completedAt": null
+    },
+    {
+      "id": "explorer",
+      "name": "Kaşif",
+      "description": "1000 blok yürüyün",
+      "completed": false,
+      "completedAt": null
+    },
+    {
+      "id": "survivor",
+      "name": "Hayatta Kalan",
+      "description": "1 saat oynayın",
+      "completed": false,
+      "completedAt": null
+    }
+  ],
+  "settings": {
+    "controls": {
+      "mouseSensitivity": 5,
+      "invertY": false,
+      "fov": 75
+    },
+    "accessibility": {
+      "colorBlindMode": false,
+      "highContrast": false,
+      "reducedMotion": false
+    },
+    "advanced": {
+      "debugMode": false,
+      "showFPS": true,
+      "showCoords": true,
+      "wireframeMode": false
+    }
+  }
+}
