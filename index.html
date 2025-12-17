@@ -3,218 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyWorld - Modular 3D Voxel Game</title>
+    <title>SkyWorld v2.0 - 3D Voxel Oyun</title>
+    <meta name="description" content="SkyWorld - Modern 3D voxel oyunu. Blokları kır, yerleştir ve kendi dünyanı oluştur!">
+    <meta name="keywords" content="minecraft, voxel, 3d oyun, sandbox, blok oyun">
+    <meta name="author" content="MiniMax Agent">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="SkyWorld v2.0">
+    <meta property="og:description" content="Modern 3D voxel oyunu - Kendi dünyanı oluştur!">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/styles.css">
+    
+    <!-- Preload Three.js -->
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js">
+    
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: white;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Arial', sans-serif;
+            user-select: none;
         }
-        .game-selector {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 700px;
-            border: 2px solid #4CAF50;
-        }
-        h1 {
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        .version-info {
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(76, 175, 80, 0.2);
-            border-radius: 10px;
-            border-left: 4px solid #4CAF50;
-        }
-        .version-info.latest {
-            background: linear-gradient(45deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.1));
-            border: 2px solid #4CAF50;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from { box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
-            to { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
-        }
-        .game-links {
-            display: grid;
-            gap: 15px;
-            margin: 30px 0;
-        }
-        .game-link {
-            display: block;
-            padding: 15px 25px;
-            background: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        .game-link:hover {
-            background: #45a049;
-            transform: scale(1.02);
-            border-color: #4CAF50;
-        }
-        .game-link.latest {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            font-size: 18px;
-            padding: 20px 30px;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-        .features {
-            text-align: left;
-            margin: 20px 0;
-        }
-        .features h3 {
-            color: #4CAF50;
-            margin-bottom: 10px;
-        }
-        .features ul {
-            list-style: none;
-            padding: 0;
-        }
-        .features li {
-            padding: 5px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        .features li:before {
-            content: "🎮";
-            position: absolute;
+        
+        #game-container {
+            position: fixed;
+            top: 0;
             left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #87CEEB;
         }
-        .architecture-info {
-            background: rgba(33, 150, 243, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #2196F3;
+        
+        /* Loading fallback */
+        .fallback-loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 9999;
         }
-        .mobile-hint {
-            background: rgba(255, 193, 7, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border-left: 4px solid #FFC107;
+        
+        .fallback-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-        .file-structure {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-            font-family: monospace;
-            font-size: 12px;
-            border: 1px solid #666;
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error fallback */
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            body {
+                touch-action: none;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="game-selector">
-        <h1>🏝️ SkyWorld</h1>
-        <p>Modular 3D Voxel Game with Advanced Architecture</p>
-        
-        <div class="version-info latest">
-            <h3>🚀 Latest Version: v9.0 - Modular Architecture</h3>
-            <p><strong>New:</strong> Organized code structure with separate modules for easy maintenance</p>
-            <p><strong>Benefits:</strong> Faster updates, better organization, improved performance</p>
-        </div>
-        
-        <div class="game-links">
-            <a href="skyworld-main.html" class="game-link latest">
-                🔧 Play SkyWorld v9.0 - Modular (Recommended)
-            </a>
-            <a href="skyworld-sound-inventory.html" class="game-link">
-                🎵 SkyWorld v8.0 (Sound & Inventory)
-            </a>
-            <a href="skyworld-physics-visual.html" class="game-link">
-                ⚡ SkyWorld v7.0 (Physics & Visual)
-            </a>
-            <a href="skyworld-block-system.html" class="game-link">
-                🔨 SkyWorld v6.1 (Block System)
-            </a>
-        </div>
-        
-        <div class="architecture-info">
-            <h3>🏗️ Modular Architecture Benefits:</h3>
-            <ul>
-                <li>🔧 <strong>Easy Updates:</strong> Modify individual components without touching entire codebase</li>
-                <li>📦 <strong>Better Organization:</strong> Separated concerns for CSS, JS, and components</li>
-                <li>🚀 <strong>Faster Loading:</strong> Load only needed modules</li>
-                <li>🔍 <strong>Easier Debugging:</strong> Isolate issues to specific modules</li>
-                <li>📱 <strong>Better Mobile:</strong> Optimized loading and performance</li>
-            </ul>
-        </div>
-        
-        <div class="features">
-            <h3>🎮 v9.0 Features:</h3>
-            <ul>
-                <li>🔧 Modular Architecture - Organized code structure</li>
-                <li>🔊 Advanced Audio System - Block sounds & background music</li>
-                <li>📦 Smart Inventory Management - 5x5 grid with stack limits</li>
-                <li>⚡ Physics System - Blocks fall with gravity</li>
-                <li>🎨 Enhanced Visual Effects - Particles & animations</li>
-                <li>🌅 Day/Night Cycle - Dynamic lighting</li>
-                <li>📱 Mobile Support - Touch controls</li>
-                <li>🏝️ Floating Islands - 6 unique islands + structures</li>
-                <li>🔨 Block System - 6 block types with properties</li>
-            </ul>
-        </div>
-        
-        <div class="file-structure">
-            <h4>📁 v9.0 File Structure:</h4>
-            <pre>
-SkyWorld/
-├── skyworld-main.html (Main game)
-├── css/
-│   ├── styles.css (Main styles)
-│   ├── inventory.css (Inventory)
-│   └── particles.css (Effects)
-├── js/
-│   ├── core.js (Game engine)
-│   ├── audio.js (Audio system)
-│   ├── inventory.js (Inventory)
-│   ├── physics.js (Physics)
-│   └── controls.js (Controls)
-└── components/
-    ├── block-system.js
-    ├── island-generator.js
-    └── ui-manager.js
-            </pre>
-        </div>
-        
-        <div class="mobile-hint">
-            <strong>📱 Mobile Users:</strong><br>
-            All versions work on phones! Touch and drag to look around. 
-            Allow audio permissions for the best experience.
-        </div>
+    <!-- Oyun container -->
+    <div id="game-container">
+        <!-- Three.js canvas buraya eklenecek -->
     </div>
-
-    <script>
-        // Auto-redirect to latest modular version after 5 seconds
-        setTimeout(() => {
-            if (confirm('Try the new SkyWorld v9.0 with Modular Architecture? It\'s faster and better organized!')) {
-                window.location.href = 'skyworld-main.html';
-            }
-        }, 5000);
+    
+    <!-- Fallback loading (JavaScript yüklenmeden önce) -->
+    <div class="fallback-loading" id="fallback-loading">
+        <div class="fallback-spinner"></div>
+        <h2>SkyWorld Yükleniyor...</h2>
+        <p>Lütfen bekleyin</p>
+    </div>
+    
+    <!-- Noscript uyarısı -->
+    <noscript>
+        <div class="error-message">
+            <h2>JavaScript Gerekli</h2>
+            <p>Bu oyun JavaScript gerektirir. Lütfen tarayıcınızda JavaScript'i etkinleştirin.</p>
+        </div>
+    </noscript>
+    
+    <!-- Ana script -->
+    <script type="module">
+        import { GameEngine } from './src/core/gameEngine.js';
+        import { UIManager } from './src/ui/UIManager.js';
+        import { applyStyles } from './assets/styles.css';
         
-        // Show architecture benefits
-        console.log('🏗️ SkyWorld v9.0 Features:');
-        console.log('  ✅ Modular Architecture - Organized code');
-        console.log('  ✅ Easy Updates - Modify individual components');
-        console.log('  ✅ Better Performance - Optimized loading');
-        console.log('  ✅ All Previous Features - Sound, Physics, Inventory, etc.');
+        // Global game state
+        window.skyWorld = {
+            engine: null,
+            ui: null,
+            initialized: false
+        };
+        
+        // Hata yakalama
+        window.addEventListener('error', (event) => {
+            console.error('SkyWorld Error:', event.error);
+            showError('Bir hata oluştu: ' + event.error.message);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('SkyWorld Promise Rejection:', event.reason);
+            showError('Beklenmeyen bir hata oluştu');
+        });
+        
+        // Hata gösterimi
+        function showError(message) {
+            const fallback = document.getElementById('fallback-loading');
+            if (fallback) {
+                fallback.innerHTML = `
+                    <div class="error-message">
+                        <h2>SkyWorld Hatası</h2>
+                        <p>${message}</p>
+                        <button onclick="location.reload()" style="
+                            background: white;
+                            color: #e74c3c;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            margin-top: 10px;
+                        ">Sayfayı Yenile</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Ana başlatma fonksiyonu
+        async function initSkyWorld() {
+            try {
+                console.log('SkyWorld v2.0 başlatılıyor...');
+                
+                // UI stillerini uygula
+                applyStyles();
+                
+                // Fallback loading'i gizle
+                const fallback = document.getElementById('fallback-loading');
+                if (fallback) {
+                    fallback.style.display = 'none';
+                }
+                
+                // UI Manager'ı başlat
+                console.log('UI Manager başlatılıyor...');
+                window.skyWorld.ui = new UIManager();
+                
+                // Game Engine'i başlat
+                console.log('Game Engine başlatılıyor...');
+                window.skyWorld.engine = new GameEngine('game-container');
+                
+                // Event listeners
+                setupEventListeners();
+                
+                // Oyunu başlat
+                console.log('Oyun başlatılıyor...');
+                window.skyWorld.engine.start();
+                
+                window.skyWorld.initialized = true;
+                console.log('SkyWorld başarıyla başlatıldı!');
+                
+                // Başarı mesajı
+                window.skyWorld.ui.showMessage('SkyWorld başlatıldı!', 'success');
+                
+            } catch (error) {
+                console.error('SkyWorld başlatma hatası:', error);
+                showError('Oyun başlatılamadı: ' + error.message);
+            }
+        }
+        
+        // Event listeners
+        function setupEventListeners() {
+            // Klavye kısayolları
+            document.addEventListener('keydown', (event) => {
+                if (window.skyWorld.ui) {
+                    window.skyWorld.ui.handleKeyPress?.(event.key);
+                }
+                
+                // ESC menü
+                if (event.key === 'Escape') {
+                    if (window.skyWorld.ui) {
+                        window.skyWorld.ui.showMenu();
+                    }
+                }
+                
+                // F11 tam ekran
+                if (event.key === 'F11') {
+                    event.preventDefault();
+                    toggleFullscreen();
+                }
+                
+                // F12 geliştirici araçları
+                if (event.key === 'F12') {
+                    event.preventDefault();
+                    toggleDevTools();
+                }
+            });
+            
+            // Custom events
+            document.addEventListener('toggle-inventory', () => {
+                if (window.skyWorld.engine?.inventorySystem) {
+                    window.skyWorld.engine.inventorySystem.toggleInventory();
+                }
+            });
+            
+            document.addEventListener('new-world', () => {
+                if (window.skyWorld.engine) {
+                    window.skyWorld.engine.destroy();
+                    setTimeout(() => initSkyWorld(), 1000);
+                }
+            });
+            
+            // Pencere kapanma uyarısı
+            window.addEventListener('beforeunload', (event) => {
+                if (window.skyWorld.initialized) {
+                    event.preventDefault();
+                    event.returnValue = 'Oyun kaydedilmemiş değişiklikler olabilir. Çıkmak istediğinizden emin misiniz?';
+                    return event.returnValue;
+                }
+            });
+            
+            // Görünüm değişiklikleri
+            window.addEventListener('resize', () => {
+                if (window.skyWorld.engine) {
+                    window.skyWorld.engine.onWindowResize();
+                }
+            });
+            
+            // Oyun odaklanma
+            window.addEventListener('focus', () => {
+                if (window.skyWorld.engine?.audioSystem) {
+                    window.skyWorld.engine.audioSystem.resumeContext();
+                }
+            });
+        }
+        
+        // Tam ekran toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Tam ekran modu desteklenmiyor:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Geliştirici araçları toggle
+        function toggleDevTools() {
+            if (window.skyWorld.ui) {
+                window.skyWorld.ui.showMessage('F12 ile geliştirici araçları açılır', 'info');
+            }
+        }
+        
+        // Debug fonksiyonları (konsol üzerinden)
+        window.debugSkyWorld = {
+            getState: () => window.skyWorld,
+            getEngine: () => window.skyWorld?.engine,
+            getUI: () => window.skyWorld?.ui,
+            crash: () => { throw new Error('Test crash'); },
+            performance: () => {
+                const perf = performance.getEntriesByType('navigation')[0];
+                console.log('Performance:', perf);
+            }
+        };
+        
+        // Sayfa yüklendiğinde başlat
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSkyWorld);
+        } else {
+            initSkyWorld();
+        }
+        
     </script>
+    
+    <!-- Google Analytics (opsiyonel) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script> -->
+    
+    <!-- Service Worker (PWA için) -->
+    <!-- <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(registrationError => console.log('SW registration failed'));
+        }
+    </script> -->
 </body>
 </html>
