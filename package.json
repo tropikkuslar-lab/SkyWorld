@@ -1,0 +1,77 @@
+{
+  "name": "skyworld",
+  "version": "2.0.0",
+  "description": "Modern 3D Voxel Oyunu - SkyWorld",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -c-1",
+    "build": "echo 'Building SkyWorld...'",
+    "deploy": "npm run build && npx gh-pages -d .",
+    "dev": "npx live-server --port=8080 --open=/index.html",
+    "test": "echo 'No tests specified' && exit 0",
+    "lint": "echo 'No linter specified' && exit 0",
+    "analyze": "echo 'No analyzer specified' && exit 0"
+  },
+  "keywords": [
+    "minecraft",
+    "voxel",
+    "3d-game",
+    "webgl",
+    "threejs",
+    "sandbox",
+    "block-game",
+    "browser-game",
+    "javascript",
+    "es6-modules"
+  ],
+  "author": {
+    "name": "MiniMax Agent",
+    "email": "agent@minimax.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tropikkuslar-lab/SkyWorld.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tropikkuslar-lab/SkyWorld/issues"
+  },
+  "homepage": "https://tropikkuslar-lab.github.io/SkyWorld/",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie <= 11"
+  ],
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
+    "gh-pages": "^6.0.0"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "three": "^0.160.0"
+  },
+  "module": "index.html",
+  "files": [
+    "index.html",
+    "src/",
+    "assets/",
+    "docs/",
+    "README.md"
+  ],
+  "directories": {
+    "doc": "docs"
+  },
+  "config": {
+    "port": 8080,
+    "host": "localhost"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/tropikkuslar-lab"
+  }
+}
