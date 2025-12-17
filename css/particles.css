@@ -1,0 +1,277 @@
+/* SkyWorld v9.0 - Particle Effects Styles */
+
+.particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 40;
+    border-radius: 50%;
+    animation: particleFloat 1s ease-out forwards;
+}
+
+/* Particle Types */
+.particle-place {
+    background: radial-gradient(circle, #4CAF50, #8BC34A);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.particle-land {
+    background: radial-gradient(circle, #FF9800, #FFC107);
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+}
+
+.particle-destroy {
+    background: radial-gradient(circle, #F44336, #FF5722);
+    box-shadow: 0 0 6px rgba(244, 67, 54, 0.4);
+}
+
+.particle-magic {
+    background: radial-gradient(circle, #9C27B0, #E91E63);
+    box-shadow: 0 0 12px rgba(156, 39, 176, 0.6);
+}
+
+/* Particle Sizes */
+.particle-small {
+    width: 3px;
+    height: 3px;
+}
+
+.particle-medium {
+    width: 5px;
+    height: 5px;
+}
+
+.particle-large {
+    width: 8px;
+    height: 8px;
+}
+
+/* Main Particle Animation */
+@keyframes particleFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0px) scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(-10px) scale(1.2) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.3) rotate(360deg);
+    }
+}
+
+/* Special Particle Effects */
+.particle-explosion {
+    animation: particleExplosion 0.8s ease-out forwards;
+}
+
+@keyframes particleExplosion {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.5) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.2) rotate(360deg);
+    }
+}
+
+.particle-float {
+    animation: particleFloatUp 2s ease-out forwards;
+}
+
+@keyframes particleFloatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0px) scale(1);
+    }
+    25% {
+        opacity: 0.9;
+        transform: translateY(-15px) scale(1.1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateY(-25px) scale(0.9);
+    }
+    75% {
+        opacity: 0.4;
+        transform: translateY(-35px) scale(0.7);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.3);
+    }
+}
+
+/* Block-specific Particle Colors */
+.particle-grass {
+    background: radial-gradient(circle, #228B22, #32CD32);
+}
+
+.particle-stone {
+    background: radial-gradient(circle, #696969, #A9A9A9);
+}
+
+.particle-wood {
+    background: radial-gradient(circle, #8B4513, #A0522D);
+}
+
+.particle-iron {
+    background: radial-gradient(circle, #C0C0C0, #E6E6FA);
+}
+
+.particle-diamond {
+    background: radial-gradient(circle, #00FFFF, #87CEEB);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+}
+
+.particle-lava {
+    background: radial-gradient(circle, #FF4500, #FF6347);
+    animation: lavaParticle 1.5s ease-out forwards;
+}
+
+@keyframes lavaParticle {
+    0% {
+        opacity: 1;
+        transform: translateY(0px) scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(-20px) scale(1.3);
+        filter: brightness(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.5);
+        filter: brightness(2);
+    }
+}
+
+/* Trail Effects */
+.particle-trail {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: linear-gradient(to bottom, transparent, #4CAF50);
+    border-radius: 1px;
+    animation: particleTrail 0.5s ease-out forwards;
+}
+
+@keyframes particleTrail {
+    0% {
+        opacity: 0.8;
+        transform: translateY(0px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.5);
+    }
+}
+
+/* Environment Particles */
+.particle-sky {
+    background: radial-gradient(circle, rgba(135, 206, 235, 0.6), rgba(135, 206, 235, 0.1));
+    animation: skyParticle 3s ease-in-out infinite;
+}
+
+@keyframes skyParticle {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(-20px) scale(1.2);
+    }
+}
+
+.particle-cloud {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+    animation: cloudDrift 4s ease-in-out infinite;
+}
+
+@keyframes cloudDrift {
+    0%, 100% {
+        opacity: 0.6;
+        transform: translateX(0px) scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: translateX(10px) scale(1.1);
+    }
+}
+
+/* Interactive Particles */
+.particle-click {
+    animation: clickParticle 0.6s ease-out forwards;
+}
+
+@keyframes clickParticle {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2) rotate(360deg);
+    }
+}
+
+/* Mobile Responsive Particles */
+@media (max-width: 768px) {
+    .particle-small {
+        width: 2px;
+        height: 2px;
+    }
+    
+    .particle-medium {
+        width: 3px;
+        height: 3px;
+    }
+    
+    .particle-large {
+        width: 5px;
+        height: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .particle {
+        z-index: 30; /* Lower z-index on mobile */
+    }
+    
+    .particle-small {
+        width: 1px;
+        height: 1px;
+    }
+    
+    .particle-medium {
+        width: 2px;
+        height: 2px;
+    }
+    
+    .particle-large {
+        width: 3px;
+        height: 3px;
+    }
+}
+
+/* Performance Optimization */
+@media (prefers-reduced-motion: reduce) {
+    .particle {
+        animation-duration: 0.3s;
+    }
+    
+    .particle-float,
+    .particle-sky,
+    .particle-cloud {
+        animation: none;
+        opacity: 0.5;
+    }
+}
