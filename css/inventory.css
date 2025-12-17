@@ -1,0 +1,279 @@
+/* SkyWorld v9.0 - Inventory System Styles */
+
+.inventory-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    z-index: 50;
+    min-width: 320px;
+    max-width: 400px;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+    padding-bottom: 10px;
+}
+
+.inventory-header h3 {
+    margin: 0;
+    color: #4CAF50;
+    font-size: 18px;
+}
+
+/* Advanced Inventory Grid */
+.advanced-inventory {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(50, 50, 50, 0.3);
+    border-radius: 10px;
+}
+
+/* Inventory Slots */
+.inventory-slot {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: rgba(30, 30, 30, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.inventory-slot:hover {
+    border-color: #4CAF50;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.inventory-slot.selected {
+    border-color: #4CAF50;
+    box-shadow: 0 0 15px #4CAF50;
+    animation: slotPulse 1s infinite alternate;
+}
+
+.inventory-slot.filled {
+    border-color: #666;
+    background: rgba(50, 50, 50, 0.9);
+}
+
+.inventory-slot.empty {
+    border-color: #222;
+    background: rgba(20, 20, 20, 0.5);
+}
+
+/* Slot Content */
+.slot-content {
+    width: 40px;
+    height: 40px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Slot Count Badge */
+.slot-count {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 1px solid rgba(76, 175, 80, 0.5);
+    min-width: 16px;
+    text-align: center;
+}
+
+.slot-count.high {
+    background: rgba(255, 193, 7, 0.9);
+    color: #000;
+}
+
+.slot-count.max {
+    background: rgba(255, 87, 34, 0.9);
+    color: white;
+}
+
+/* Block Type Colors for Slots */
+.slot-grass .slot-content {
+    background: linear-gradient(135deg, #228B22, #32CD32);
+    color: white;
+}
+
+.slot-stone .slot-content {
+    background: linear-gradient(135deg, #696969, #A9A9A9);
+    color: white;
+}
+
+.slot-wood .slot-content {
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    color: white;
+}
+
+.slot-iron .slot-content {
+    background: linear-gradient(135deg, #C0C0C0, #E6E6FA);
+    color: #333;
+}
+
+.slot-diamond .slot-content {
+    background: linear-gradient(135deg, #00FFFF, #87CEEB);
+    color: #000;
+}
+
+.slot-lava .slot-content {
+    background: linear-gradient(135deg, #FF4500, #FF6347);
+    color: white;
+    animation: lavaGlow 2s infinite alternate;
+}
+
+/* Inventory Stats */
+.inventory-stats {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #4CAF50;
+}
+
+.inventory-stats p {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.inventory-stats .stat-highlight {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Inventory Actions */
+.inventory-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.inventory-action {
+    padding: 8px 16px;
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+}
+
+.inventory-action:hover {
+    background: rgba(76, 175, 80, 0.4);
+    transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes slotPulse {
+    0% { transform: scale(1.05); }
+    100% { transform: scale(1.08); }
+}
+
+@keyframes lavaGlow {
+    0% { 
+        box-shadow: 0 0 5px rgba(255, 69, 0, 0.5);
+        filter: brightness(1);
+    }
+    100% { 
+        box-shadow: 0 0 15px rgba(255, 69, 0, 0.8);
+        filter: brightness(1.2);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .inventory-panel {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        min-width: auto;
+        max-width: none;
+        padding: 15px;
+    }
+    
+    .advanced-inventory {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        padding: 8px;
+    }
+    
+    .inventory-slot {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .slot-content {
+        width: 32px;
+        height: 32px;
+        font-size: 8px;
+    }
+    
+    .slot-count {
+        font-size: 8px;
+        padding: 1px 4px;
+        bottom: 1px;
+        right: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .advanced-inventory {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        padding: 6px;
+    }
+    
+    .inventory-slot {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .slot-content {
+        width: 28px;
+        height: 28px;
+        font-size: 7px;
+    }
+    
+    .inventory-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .sound-toggle {
+        align-self: flex-end;
+    }
+}
