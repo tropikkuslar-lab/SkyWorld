@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWorld v8.0: Sound & Inventory Enhancement</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #welcome-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #4CAF50;
+            z-index: 100;
+        }
+        #start-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        #start-button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 250px;
+            z-index: 50;
+        }
+        .block-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .block-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .block-btn:hover {
+            transform: scale(1.1);
+            border-color: #4CAF50;
+        }
+        .block-btn.active {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+        .block-grass { 
+            background: linear-gradient(135deg, #228B22 0%, #32CD32 50%, #228B22 100%);
+            border: 2px solid #1e5f1e;
+        }
+        .block-stone { 
+            background: linear-gradient(135deg, #696969 0%, #A9A9A9 50%, #696969 100%);
+            border: 2px solid #4f4f4f;
+        }
+        .block-wood { 
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            border: 2px solid #654321;
+        }
+        .block-iron { 
+            background: linear-gradient(135deg, #C0C0C0 0%, #E6E6FA 50%, #C0C0C0 100%);
+            border: 2px solid #808080;
+        }
+        .block-diamond { 
+            background: linear-gradient(135deg, #00FFFF 0%, #87CEEB 50%, #00FFFF 100%);
+            border: 2px solid #00BFFF;
+        }
+        .block-lava { 
+            background: linear-gradient(135deg, #FF4500 0%, #FF6347 50%, #FF4500 100%);
+            border: 2px solid #FF0000;
+        }
+        .inventory-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            z-index: 50;
+            min-width: 300px;
+        }
+        .advanced-inventory {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .inventory-slot {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            background: rgba(50, 50, 50, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .inventory-slot:hover {
+            border-color: #4CAF50;
+            transform: scale(1.05);
+        }
+        .inventory-slot.selected {
+            border-color: #4CAF50;
+            box-shadow: 0 0 15px #4CAF50;
+        }
+        .inventory-slot.filled {
+            border-color: #666;
+        }
+        .slot-content {
+            width: 40px;
+            height: 40px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        .slot-count {
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .sound-toggle {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .sound-toggle.off {
+            background: #f44336;
+        }
+        .time-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            z-index: 50;
+        }
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 50;
+            font-size: 12px;
+        }
+        .physics-info {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 50;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #4CAF50;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 40;
+            animation: particleFloat 1s ease-out forwards;
+        }
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.5);
+            }
+        }
+        .sound-info {
+            position: absolute;
+            top: 20px;
+            left: 480px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="welcome-message">
+            <h1>🏝️ SkyWorld v8.0</h1>
+            <h2>Sound & Inventory Enhancement</h2>
+            <p>🔊 Advanced Sound System<br>
+            📦 Smart Inventory Management<br>
+            ⚡ Physics System<br>
+            🎨 Enhanced Visuals</p>
+            <button id="start-button">Start Playing!</button>
+        </div>
+        
+        <div class="ui-panel" id="block-panel" style="display: none;">
+            <h3>🔨 Block Selection</h3>
+            <p>Click a block to select</p>
+            <div class="block-selector">
+                <div class="block-btn block-grass active" data-block="grass" title="Grass Block"></div>
+                <div class="block-btn block-stone" data-block="stone" title="Stone Block"></div>
+                <div class="block-btn block-wood" data-block="wood" title="Wood Block"></div>
+                <div class="block-btn block-iron" data-block="iron" title="Iron Block"></div>
+                <div class="block-btn block-diamond" data-block="diamond" title="Diamond Block"></div>
+                <div class="block-btn block-lava" data-block="lava" title="Lava Block"></div>
+            </div>
+        </div>
+        
+        <div class="inventory-panel" id="inventory-panel" style="display: none;">
+            <div class="inventory-header">
+                <h3>📦 Advanced Inventory</h3>
+                <button class="sound-toggle" id="sound-toggle">🔊 Sound ON</button>
+            </div>
+            <div class="advanced-inventory" id="advanced-inventory">
+                <!-- Inventory slots will be generated by JavaScript -->
+            </div>
+            <div style="margin-top: 10px; font-size: 12px;">
+                <p>🔄 Click slots to select blocks</p>
+                <p>📦 Max 64 per slot stack</p>
+            </div>
+        </div>
+        
+        <div class="time-display" id="time-display" style="display: none;">
+            <span id="time-text">Day 1 - 12:00</span>
+        </div>
+        
+        <div class="physics-info" id="physics-info" style="display: none;">
+            <strong>⚡ Physics:</strong><br>
+            <span id="gravity-status">Gravity: ON</span><br>
+            <span id="falling-blocks">Falling: 0</span>
+        </div>
+        
+        <div class="sound-info" id="sound-info" style="display: none;">
+            <strong>🔊 Audio:</strong><br>
+            <span id="sound-status">Background: Playing</span><br>
+            <span id="effects-status">Effects: Enabled</span>
+        </div>
+        
+        <div class="controls-hint" id="controls-hint" style="display: none;">
+            <strong>🎮 Controls:</strong><br>
+            <strong>Desktop:</strong> WASD movement, Mouse look<br>
+            <strong>Mobile:</strong> Touch & drag to look<br>
+            <strong>Blocks:</strong> Click blocks to select, click empty space to place<br>
+            <strong>Physics:</strong> P key to toggle gravity<br>
+            <strong>Sound:</strong> Click sound button to mute/unmute
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // SkyWorld v8.0 Game Variables
+        let scene, camera, renderer;
+        let islands = [];
+        let placedBlocks = [];
+        let fallingBlocks = [];
+        let timeOfDay = 12;
+        let dayNumber = 1;
+        let selectedBlockType = 'grass';
+        let player = { x: 0, y: 8, z: 0 };
+        let gameStarted = false;
+        let physicsEnabled = true;
+        let soundEnabled = true;
+        
+        // NEW: Audio System
+        let audioContext;
+        let backgroundMusic;
+        let isMusicPlaying = false;
+        
+        // NEW: Advanced Inventory System
+        let inventory = {
+            slots: Array(25).fill(null), // 5x5 grid
+            maxStackSize: 64,
+            selectedSlot: 0
+        };
+
+        // Enhanced block types with sound properties
+        const blockTypes = {
+            grass: { 
+                color: 0x228B22, 
+                name: 'Grass',
+                hasTexture: true,
+                density: 0.8,
+                breakable: true,
+                sound: 'grass'
+            },
+            stone: { 
+                color: 0x696969, 
+                name: 'Stone',
+                hasTexture: true,
+                density: 2.5,
+                breakable: true,
+                sound: 'stone'
+            },
+            wood: { 
+                color: 0x8B4513, 
+                name: 'Wood',
+                hasTexture: true,
+                density: 0.6,
+                breakable: true,
+                sound: 'wood'
+            },
+            iron: { 
+                color: 0xC0C0C0, 
+                name: 'Iron',
+                hasTexture: true,
+                density: 7.8,
+                breakable: false,
+                sound: 'metal'
+            },
+            diamond: { 
+                color: 0x00FFFF, 
+                name: 'Diamond',
+                hasTexture: true,
+                density: 3.5,
+                breakable: false,
+                sound: 'crystal'
+            },
+            lava: { 
+                color: 0xFF4500, 
+                name: 'Lava',
+                hasTexture: true,
+                density: 2.8,
+                breakable: true,
+                emissive: true,
+                sound: 'liquid'
+            }
+        };
+
+        // Initialize Game
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 SkyWorld v8.0: Sound & Inventory Enhancement - Initializing...');
+            
+            // Initialize audio context
+            initializeAudio();
+            
+            const startButton = document.getElementById('start-button');
+            const welcomeMessage = document.getElementById('welcome-message');
+            
+            startButton.addEventListener('click', function() {
+                welcomeMessage.style.display = 'none';
+                document.getElementById('block-panel').style.display = 'block';
+                document.getElementById('inventory-panel').style.display = 'block';
+                document.getElementById('time-display').style.display = 'block';
+                document.getElementById('physics-info').style.display = 'block';
+                document.getElementById('sound-info').style.display = 'block';
+                document.getElementById('controls-hint').style.display = 'block';
+                initializeGame();
+            });
+            
+            setupBlockSelection();
+            setupAdvancedInventory();
+            setupSoundToggle();
+        });
+
+        // NEW: Audio System
+        function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('🔊 Audio context initialized');
+            } catch (e) {
+                console.log('⚠️ Web Audio API not supported');
+                soundEnabled = false;
+            }
+        }
+
+        function playBlockSound(blockType) {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            // Different frequencies for different block types
+            const frequencies = {
+                grass: [200, 220],
+                stone: [150, 180],
+                wood: [250, 280],
+                iron: [400, 450],
+                diamond: [600, 700],
+                liquid: [100, 120],
+                crystal: [800, 900]
+            };
+            
+            const freq = frequencies[blockType] || [300, 350];
+            oscillator.frequency.setValueAtTime(freq[0], audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(freq[1], audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playBackgroundMusic() {
+            if (!soundEnabled || !audioContext) return;
+            
+            // Simple background melody
+            const playNote = (frequency, duration, delay) => {
+                setTimeout(() => {
+                    if (!soundEnabled) return;
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + duration);
+                }, delay);
+            };
+            
+            // Play a simple melody
+            const melody = [
+                [261.63, 0.3], // C
+                [293.66, 0.3], // D
+                [329.63, 0.3], // E
+                [349.23, 0.3], // F
+                [392.00, 0.6], // G
+                [440.00, 0.3], // A
+                [493.88, 0.6], // B
+                [523.25, 1.0]  // C
+            ];
+            
+            let delay = 0;
+            melody.forEach(([freq, duration]) => {
+                playNote(freq, duration, delay * 1000);
+                delay += duration;
+            });
+            
+            // Repeat the melody
+            setTimeout(() => {
+                if (soundEnabled && gameStarted) {
+                    playBackgroundMusic();
+                }
+            }, delay * 1000 + 2000);
+        }
+
+        function setupSoundToggle() {
+            const soundToggle = document.getElementById('sound-toggle');
+            soundToggle.addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                this.textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+                this.classList.toggle('off', !soundEnabled);
+                
+                document.getElementById('sound-status').textContent = `Background: ${soundEnabled ? 'Playing' : 'Muted'}`;
+                document.getElementById('effects-status').textContent = `Effects: ${soundEnabled ? 'Enabled' : 'Disabled'}`;
+                
+                if (soundEnabled && !isMusicPlaying) {
+                    playBackgroundMusic();
+                    isMusicPlaying = true;
+                }
+            });
+        }
+
+        // NEW: Advanced Inventory System
+        function setupAdvancedInventory() {
+            const inventoryContainer = document.getElementById('advanced-inventory');
+            
+            // Initialize inventory with starting items
+            inventory.slots[0] = { type: 'grass', count: 20 };
+            inventory.slots[1] = { type: 'stone', count: 15 };
+            inventory.slots[2] = { type: 'wood', count: 10 };
+            inventory.slots[3] = { type: 'iron', count: 5 };
+            inventory.slots[4] = { type: 'diamond', count: 2 };
+            inventory.slots[5] = { type: 'lava', count: 8 };
+            
+            // Create inventory slots
+            for (let i = 0; i < 25; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                slot.dataset.slot = i;
+                
+                if (inventory.slots[i]) {
+                    const content = document.createElement('div');
+                    content.className = 'slot-content';
+                    content.style.background = getBlockColor(inventory.slots[i].type);
+                    content.textContent = inventory.slots[i].type.charAt(0).toUpperCase();
+                    
+                    const count = document.createElement('div');
+                    count.className = 'slot-count';
+                    count.textContent = inventory.slots[i].count;
+                    
+                    slot.appendChild(content);
+                    slot.appendChild(count);
+                    slot.classList.add('filled');
+                }
+                
+                slot.addEventListener('click', function() {
+                    selectSlot(i);
+                });
+                
+                inventoryContainer.appendChild(slot);
+            }
+            
+            selectSlot(0); // Select first slot
+        }
+
+        function getBlockColor(blockType) {
+            const colors = {
+                grass: 'linear-gradient(135deg, #228B22, #32CD32)',
+                stone: 'linear-gradient(135deg, #696969, #A9A9A9)',
+                wood: 'linear-gradient(135deg, #8B4513, #A0522D)',
+                iron: 'linear-gradient(135deg, #C0C0C0, #E6E6FA)',
+                diamond: 'linear-gradient(135deg, #00FFFF, #87CEEB)',
+                lava: 'linear-gradient(135deg, #FF4500, #FF6347)'
+            };
+            return colors[blockType] || '#666';
+        }
+
+        function selectSlot(slotIndex) {
+            // Remove selection from all slots
+            document.querySelectorAll('.inventory-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            
+            // Select new slot
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            if (slot) {
+                slot.classList.add('selected');
+            }
+            
+            inventory.selectedSlot = slotIndex;
+            
+            // Update selected block type
+            if (inventory.slots[slotIndex]) {
+                selectedBlockType = inventory.slots[slotIndex].type;
+                
+                // Update UI panel selection
+                document.querySelectorAll('.block-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                const activeBtn = document.querySelector(`[data-block="${selectedBlockType}"]`);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+        }
+
+        function addToInventory(blockType, amount = 1) {
+            // Try to stack with existing blocks first
+            for (let i = 0; i < inventory.slots.length; i++) {
+                const slot = inventory.slots[i];
+                if (slot && slot.type === blockType && slot.count < inventory.maxStackSize) {
+                    const spaceLeft = inventory.maxStackSize - slot.count;
+                    const amountToAdd = Math.min(amount, spaceLeft);
+                    slot.count += amountToAdd;
+                    amount -= amountToAdd;
+                    
+                    if (amount <= 0) break;
+                }
+            }
+            
+            // Add to empty slots if still have items
+            if (amount > 0) {
+                for (let i = 0; i < inventory.slots.length && amount > 0; i++) {
+                    if (!inventory.slots[i]) {
+                        const amountToAdd = Math.min(amount, inventory.maxStackSize);
+                        inventory.slots[i] = { type: blockType, count: amountToAdd };
+                        amount -= amountToAdd;
+                    }
+                }
+            }
+            
+            updateInventoryDisplay();
+        }
+
+        function removeFromInventory(blockType, amount = 1) {
+            let amountRemoved = 0;
+            
+            for (let i = 0; i < inventory.slots.length && amountRemoved < amount; i++) {
+                const slot = inventory.slots[i];
+                if (slot && slot.type === blockType) {
+                    const toRemove = Math.min(amount - amountRemoved, slot.count);
+                    slot.count -= toRemove;
+                    amountRemoved += toRemove;
+                    
+                    if (slot.count <= 0) {
+                        inventory.slots[i] = null;
+                    }
+                }
+            }
+            
+            updateInventoryDisplay();
+            return amountRemoved;
+        }
+
+        function updateInventoryDisplay() {
+            const slots = document.querySelectorAll('.inventory-slot');
+            
+            slots.forEach((slot, index) => {
+                // Clear slot
+                slot.innerHTML = '';
+                slot.classList.remove('filled');
+                
+                // Add content if slot has items
+                if (inventory.slots[index]) {
+                    const content = document.createElement('div');
+                    content.className = 'slot-content';
+                    content.style.background = getBlockColor(inventory.slots[index].type);
+                    content.textContent = inventory.slots[index].type.charAt(0).toUpperCase();
+                    
+                    const count = document.createElement('div');
+                    count.className = 'slot-count';
+                    count.textContent = inventory.slots[index].count;
+                    
+                    slot.appendChild(content);
+                    slot.appendChild(count);
+                    slot.classList.add('filled');
+                }
+            });
+        }
+
+        function setupBlockSelection() {
+            const blockButtons = document.querySelectorAll('.block-btn');
+            blockButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    blockButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedBlockType = this.dataset.block;
+                    
+                    // Find and select corresponding inventory slot
+                    for (let i = 0; i < inventory.slots.length; i++) {
+                        if (inventory.slots[i] && inventory.slots[i].type === selectedBlockType) {
+                            selectSlot(i);
+                            break;
+                        }
+                    }
+                    
+                    console.log(`🔨 Selected block: ${selectedBlockType}`);
+                });
+            });
+        }
+
+        function initializeGame() {
+            gameStarted = true;
+            
+            // Start background music
+            if (soundEnabled) {
+                setTimeout(() => {
+                    playBackgroundMusic();
+                    isMusicPlaying = true;
+                }, 1000);
+            }
+            
+            // Initialize Three.js Scene
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x87CEEB);
+            document.getElementById('game-container').appendChild(renderer.domElement);
+            
+            updateLighting();
+            createFloatingIslands();
+            createSkyBridges();
+            createAerialStructures();
+            
+            camera.position.set(player.x, player.y + 5, player.z + 10);
+            camera.lookAt(player.x, player.y, player.z);
+            
+            setupControls();
+            setupBlockPlacement();
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                updateTimeOfDay();
+                updatePhysics();
+                
+                islands.forEach(island => {
+                    island.rotation.y += 0.001;
+                });
+                
+                updateBlockAnimations();
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            console.log('✅ SkyWorld v8.0 initialized with Sound & Inventory Enhancement!');
+            console.log('🔊 Advanced Audio System Active');
+            console.log('📦 Smart Inventory Management Enabled');
+        }
+
+        function updatePhysics() {
+            if (!physicsEnabled) return;
+            
+            const gravity = 0.5;
+            const blocksToRemove = [];
+            
+            fallingBlocks.forEach((block, index) => {
+                block.velocity.y -= gravity;
+                block.mesh.position.y += block.velocity.y;
+                
+                const groundY = findGroundLevel(block.mesh.position.x, block.mesh.position.z);
+                
+                if (block.mesh.position.y <= groundY + 0.5) {
+                    block.mesh.position.y = groundY + 0.5;
+                    block.velocity.y = 0;
+                    
+                    const supportBlocks = getSupportBlocks(block.mesh.position);
+                    if (supportBlocks.length > 0) {
+                        placedBlocks.push(block.mesh);
+                        fallingBlocks.splice(index, 1);
+                        
+                        createParticles(block.mesh.position.x, block.mesh.position.y, block.mesh.position.z, 'land');
+                        
+                        console.log(`📦 Block landed at (${block.mesh.position.x}, ${block.mesh.position.y}, ${block.mesh.position.z})`);
+                    }
+                }
+                
+                if (block.mesh.position.y < -50) {
+                    blocksToRemove.push(index);
+                }
+            });
+            
+            blocksToRemove.forEach(index => {
+                scene.remove(fallingBlocks[index].mesh);
+                fallingBlocks.splice(index, 1);
+            });
+            
+            document.getElementById('falling-blocks').textContent = `Falling: ${fallingBlocks.length}`;
+        }
+
+        function findGroundLevel(x, z) {
+            let groundLevel = -10;
+            
+            placedBlocks.forEach(block => {
+                const pos = block.position;
+                if (Math.abs(pos.x - x) < 0.6 && Math.abs(pos.z - z) < 0.6) {
+                    groundLevel = Math.max(groundLevel, pos.y + 0.5);
+                }
+            });
+            
+            fallingBlocks.forEach(block => {
+                const pos = block.mesh.position;
+                if (Math.abs(pos.x - x) < 0.6 && Math.abs(pos.z - z) < 0.6) {
+                    groundLevel = Math.max(groundLevel, pos.y + 0.5);
+                }
+            });
+            
+            islands.forEach(island => {
+                const pos = island.position;
+                if (Math.abs(pos.x - x) < island.geometry.parameters.radiusTop * 1.2 && 
+                    Math.abs(pos.z - z) < island.geometry.parameters.radiusTop * 1.2) {
+                    groundLevel = Math.max(groundLevel, pos.y + 1);
+                }
+            });
+            
+            return groundLevel;
+        }
+
+        function getSupportBlocks(position) {
+            const supportBlocks = [];
+            const checkY = position.y - 1;
+            const checkX = position.x;
+            const checkZ = position.z;
+            
+            placedBlocks.forEach(block => {
+                if (Math.abs(block.position.x - checkX) < 0.6 &&
+                    Math.abs(block.position.y - checkY) < 0.6 &&
+                    Math.abs(block.position.z - checkZ) < 0.6) {
+                    supportBlocks.push(block);
+                }
+            });
+            
+            return supportBlocks;
+        }
+
+        function createParticles(x, y, z, type) {
+            const particleCount = type === 'place' ? 5 : 8;
+            const colors = {
+                place: ['#4CAF50', '#8BC34A', '#CDDC39'],
+                land: ['#FF9800', '#FFC107', '#FFEB3B']
+            };
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = colors[type][Math.floor(Math.random() * colors[type].length)];
+                particle.style.left = (x * 20 + window.innerWidth / 2) + 'px';
+                particle.style.top = (y * 20 + window.innerHeight / 2) + 'px';
+                
+                const offsetX = (Math.random() - 0.5) * 100;
+                const offsetY = (Math.random() - 0.5) * 100;
+                particle.style.transform += ` translate(${offsetX}px, ${offsetY}px)`;
+                
+                document.getElementById('game-container').appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 1000);
+            }
+        }
+
+        function updateBlockAnimations() {
+            placedBlocks.forEach(block => {
+                if (block.userData.blockType === 'lava') {
+                    const material = block.material;
+                    if (material.emissive) {
+                        material.emissive.setHex(0xFF4500 + Math.sin(Date.now() * 0.003) * 0x100000);
+                    }
+                }
+            });
+        }
+
+        function updateLighting() {
+            const existingLights = scene.children.filter(child => child.isLight);
+            existingLights.forEach(light => scene.remove(light));
+            
+            const timeFactor = Math.sin((timeOfDay / 24) * Math.PI * 2) * 0.5 + 0.5;
+            
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3 + timeFactor * 0.4);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8 * timeFactor + 0.2);
+            directionalLight.position.set(50 * timeFactor, 50, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 200;
+            directionalLight.shadow.camera.left = -50;
+            directionalLight.shadow.camera.right = 50;
+            directionalLight.shadow.camera.top = 50;
+            directionalLight.shadow.camera.bottom = -50;
+            scene.add(directionalLight);
+            
+            placedBlocks.forEach(block => {
+                if (block.userData.blockType === 'lava' && block.material.emissive) {
+                    const lavaLight = new THREE.PointLight(0xFF4500, 0.5, 10);
+                    lavaLight.position.copy(block.position);
+                    scene.add(lavaLight);
+                }
+            });
+            
+            const skyColor = new THREE.Color().lerpColors(
+                new THREE.Color(0x000011),
+                new THREE.Color(0x87CEEB),
+                timeFactor
+            );
+            renderer.setClearColor(skyColor);
+        }
+
+        function updateTimeOfDay() {
+            if (!gameStarted) return;
+            
+            timeOfDay += 0.02;
+            
+            if (timeOfDay >= 24) {
+                timeOfDay = 0;
+                dayNumber++;
+            }
+            
+            updateLighting();
+            
+            const hours = Math.floor(timeOfDay);
+            const minutes = Math.floor((timeOfDay % 1) * 60);
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            document.getElementById('time-text').textContent = `Day ${dayNumber} - ${timeString}`;
+        }
+
+        function createFloatingIslands() {
+            const islandData = [
+                { x: -10, y: 8, z: -5, radius: 3, color: 0x228B22, name: 'Forest Island' },
+                { x: 15, y: 12, z: 8, radius: 4, color: 0x8B4513, name: 'Mountain Island' },
+                { x: -5, y: 6, z: 12, radius: 2, color: 0x32CD32, name: 'Grass Island' },
+                { x: 8, y: 15, z: -12, radius: 5, color: 0xFF8C00, name: 'Desert Island' },
+                { x: 18, y: 9, z: -3, radius: 3, color: 0x9ACD32, name: 'Meadow Island' },
+                { x: -15, y: 14, z: 10, radius: 4, color: 0x20B2AA, name: 'Ocean Island' }
+            ];
+            
+            islandData.forEach((island, index) => {
+                const geometry = new THREE.CylinderGeometry(island.radius, island.radius * 1.2, 2, 12);
+                const material = new THREE.MeshLambertMaterial({ 
+                    color: island.color,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const islandMesh = new THREE.Mesh(geometry, material);
+                
+                islandMesh.position.set(island.x, island.y, island.z);
+                islandMesh.userData = { type: 'island', name: island.name };
+                islandMesh.castShadow = true;
+                islandMesh.receiveShadow = true;
+                scene.add(islandMesh);
+                islands.push(islandMesh);
+                
+                const topGeometry = new THREE.CylinderGeometry(island.radius * 0.9, island.radius * 0.9, 0.3, 12);
+                const topMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x228B22,
+                    emissive: 0x001100
+                });
+                const topMesh = new THREE.Mesh(topGeometry, topMaterial);
+                topMesh.position.set(island.x, island.y + 1.15, island.z);
+                topMesh.castShadow = true;
+                topMesh.receiveShadow = true;
+                scene.add(topMesh);
+                
+                addNaturalBlocks(island.x, island.y + 1.5, island.z, island.radius);
+                
+                console.log(`🏝️ ${island.name} created with sound-enabled blocks`);
+            });
+        }
+
+        function addNaturalBlocks(centerX, centerY, centerZ, radius) {
+            for (let i = 0; i < Math.floor(radius * 2); i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * radius * 0.8;
+                const x = centerX + Math.cos(angle) * distance;
+                const z = centerZ + Math.sin(angle) * distance;
+                const y = centerY + 0.2;
+                
+                if (Math.random() > 0.5) {
+                    createBlock(x, y, z, 'wood');
+                    createBlock(x, y + 1, z, 'wood');
+                    createBlock(x, y + 2, z, 'wood');
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dz = -1; dz <= 1; dz++) {
+                            createBlock(x + dx, y + 3, z + dz, 'grass');
+                        }
+                    }
+                } else {
+                    createBlock(x, y, z, 'stone');
+                    if (Math.random() > 0.5) {
+                        createBlock(x, y + 1, z, 'stone');
+                    }
+                }
+            }
+        }
+
+        function createSkyBridges() {
+            const bridges = [
+                { start: [-10, 10, -5], end: [15, 14, 8], color: 0x8B4513 },
+                { start: [-5, 8, 12], end: [18, 11, -3], color: 0x8B4513 },
+                { start: [-10, 10, -5], end: [-10, 15, -5], color: 0x8B4513 }
+            ];
+            
+            bridges.forEach((bridge, index) => {
+                const [startX, startY, startZ] = bridge.start;
+                const [endX, endY, endZ] = bridge.end;
+                
+                const length = Math.sqrt(
+                    Math.pow(endX - startX, 2) + 
+                    Math.pow(endY - startY, 2) + 
+                    Math.pow(endZ - startZ, 2)
+                );
+                
+                const midX = (startX + endX) / 2;
+                const midY = (startY + endY) / 2;
+                const midZ = (startZ + endZ) / 2;
+                
+                const geometry = new THREE.BoxGeometry(length, 0.5, 1);
+                const material = new THREE.MeshLambertMaterial({ 
+                    color: bridge.color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const bridgeMesh = new THREE.Mesh(geometry, material);
+                
+                bridgeMesh.position.set(midX, midY, midZ);
+                bridgeMesh.userData = { type: 'bridge', index: index };
+                bridgeMesh.castShadow = true;
+                scene.add(bridgeMesh);
+                
+                console.log(`🌉 Bridge ${index + 1} with audio support created`);
+            });
+        }
+
+        function createAerialStructures() {
+            const castleGeometry = new THREE.BoxGeometry(6, 8, 6);
+            const castleMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x696969,
+                transparent: true,
+                opacity: 0.9
+            });
+            const castle = new THREE.Mesh(castleGeometry, castleMaterial);
+            castle.position.set(20, 18, 0);
+            castle.userData = { type: 'castle', name: 'Sky Castle' };
+            castle.castShadow = true;
+            scene.add(castle);
+            
+            const towerGeometry = new THREE.CylinderGeometry(2, 2, 15, 8);
+            const towerMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x778899,
+                transparent: true,
+                opacity: 0.9
+            });
+            const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+            tower.position.set(-20, 22, 15);
+            tower.userData = { type: 'tower', name: 'Sky Tower' };
+            tower.castShadow = true;
+            scene.add(tower);
+            
+            const pyramidGeometry = new THREE.ConeGeometry(5, 8, 4);
+            const pyramidMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xDAA520,
+                transparent: true,
+                opacity: 0.9
+            });
+            const pyramid = new THREE.Mesh(pyramidGeometry, pyramidMaterial);
+            pyramid.position.set(0, 16, -18);
+            pyramid.userData = { type: 'pyramid', name: 'Sky Pyramid' };
+            pyramid.castShadow = true;
+            scene.add(pyramid);
+            
+            console.log('🏰 Enhanced aerial structures created with sound support');
+        }
+
+        function createBlock(x, y, z, blockType) {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshLambertMaterial({ 
+                color: blockTypes[blockType].color,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            if (blockTypes[blockType].emissive) {
+                material.emissive = new THREE.Color(blockTypes[blockType].color);
+                material.emissiveIntensity = 0.2;
+            }
+            
+            const blockMesh = new THREE.Mesh(geometry, material);
+            
+            blockMesh.position.set(x, y, z);
+            blockMesh.userData = { type: 'block', blockType: blockType };
+            blockMesh.castShadow = true;
+            blockMesh.receiveShadow = true;
+            
+            scene.add(blockMesh);
+            placedBlocks.push(blockMesh);
+            
+            createParticles(x, y, z, 'place');
+            
+            return blockMesh;
+        }
+
+        function setupControls() {
+            document.addEventListener('keydown', function(event) {
+                if (!gameStarted) return;
+                
+                const speed = 1;
+                switch(event.code) {
+                    case 'KeyW':
+                    case 'ArrowUp':
+                        player.z -= speed;
+                        break;
+                    case 'KeyS':
+                    case 'ArrowDown':
+                        player.z += speed;
+                        break;
+                    case 'KeyA':
+                    case 'ArrowLeft':
+                        player.x -= speed;
+                        break;
+                    case 'KeyD':
+                    case 'ArrowRight':
+                        player.x += speed;
+                        break;
+                    case 'KeyP':
+                        physicsEnabled = !physicsEnabled;
+                        document.getElementById('gravity-status').textContent = `Gravity: ${physicsEnabled ? 'ON' : 'OFF'}`;
+                        console.log(`⚡ Physics ${physicsEnabled ? 'enabled' : 'disabled'}`);
+                        break;
+                }
+                
+                camera.position.x = player.x;
+                camera.position.z = player.z + 10;
+                camera.lookAt(player.x, player.y, player.z);
+            });
+            
+            let mouseDown = false;
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+            
+            renderer.domElement.addEventListener('mousedown', function(event) {
+                if (!gameStarted) return;
+                mouseDown = true;
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+            });
+            
+            document.addEventListener('mouseup', function() {
+                mouseDown = false;
+            });
+            
+            document.addEventListener('mousemove', function(event) {
+                if (!gameStarted) return;
+                
+                if (mouseDown) {
+                    const deltaX = event.clientX - lastMouseX;
+                    const deltaY = event.clientY - lastMouseY;
+                    
+                    camera.rotation.y -= deltaX * 0.01;
+                    camera.rotation.x -= deltaY * 0.01;
+                    
+                    lastMouseX = event.clientX;
+                    lastMouseY = event.clientY;
+                }
+            });
+        }
+
+        function setupBlockPlacement() {
+            renderer.domElement.addEventListener('click', function(event) {
+                if (!gameStarted) return;
+                
+                const mouse = new THREE.Vector2();
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(scene.children);
+                
+                if (intersects.length > 0) {
+                    const intersect = intersects[0];
+                    const point = intersect.point;
+                    
+                    const normal = intersect.face.normal.clone();
+                    const placementPoint = point.clone().add(normal.multiplyScalar(0.5));
+                    
+                    placementPoint.x = Math.round(placementPoint.x);
+                    placementPoint.y = Math.round(placementPoint.y);
+                    placementPoint.z = Math.round(placementPoint.z);
+                    
+                    // Check inventory before placing
+                    const canPlace = removeFromInventory(selectedBlockType, 1) > 0;
+                    
+                    if (canPlace) {
+                        const newBlock = createBlock(placementPoint.x, placementPoint.y, placementPoint.z, selectedBlockType);
+                        
+                        // Play block placement sound
+                        playBlockSound(selectedBlockType);
+                        
+                        const groundLevel = findGroundLevel(placementPoint.x, placementPoint.z);
+                        const supportBlocks = getSupportBlocks(placementPoint);
+                        
+                        if (physicsEnabled && supportBlocks.length === 0 && placementPoint.y > groundLevel + 0.5) {
+                            const fallingBlock = {
+                                mesh: newBlock,
+                                velocity: { x: 0, y: 0, z: 0 },
+                                blockType: selectedBlockType
+                            };
+                            
+                            const index = placedBlocks.indexOf(newBlock);
+                            if (index > -1) {
+                                placedBlocks.splice(index, 1);
+                            }
+                            
+                            fallingBlocks.push(fallingBlock);
+                            console.log(`🔨 ${selectedBlockType} block will fall due to gravity`);
+                        }
+                        
+                        console.log(`🔨 Placed ${selectedBlockType} block at (${placementPoint.x}, ${placementPoint.y}, ${placementPoint.z})`);
+                    } else {
+                        console.log(`📦 No ${selectedBlockType} blocks available in inventory`);
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('resize', function() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>
