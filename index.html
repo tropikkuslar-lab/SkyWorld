@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyWorld - Advanced 3D Voxel Game</title>
+    <title>SkyWorld - Modular 3D Voxel Game</title>
     <style>
         body {
             margin: 0;
@@ -21,7 +21,7 @@
             padding: 40px;
             border-radius: 20px;
             text-align: center;
-            max-width: 600px;
+            max-width: 700px;
             border: 2px solid #4CAF50;
         }
         h1 {
@@ -34,6 +34,15 @@
             background: rgba(76, 175, 80, 0.2);
             border-radius: 10px;
             border-left: 4px solid #4CAF50;
+        }
+        .version-info.latest {
+            background: linear-gradient(45deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.1));
+            border: 2px solid #4CAF50;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
+            to { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
         }
         .game-links {
             display: grid;
@@ -85,6 +94,13 @@
             position: absolute;
             left: 0;
         }
+        .architecture-info {
+            background: rgba(33, 150, 243, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
         .mobile-hint {
             background: rgba(255, 193, 7, 0.2);
             padding: 15px;
@@ -92,21 +108,35 @@
             margin-top: 20px;
             border-left: 4px solid #FFC107;
         }
+        .file-structure {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #666;
+        }
     </style>
 </head>
 <body>
     <div class="game-selector">
         <h1>🏝️ SkyWorld</h1>
-        <p>Advanced 3D Voxel Game with Physics, Audio & Inventory</p>
+        <p>Modular 3D Voxel Game with Advanced Architecture</p>
         
-        <div class="version-info">
-            <h3>🚀 Latest Version: v8.0</h3>
-            <p><strong>Complete Feature Set:</strong> Physics, Sound, Inventory, Visual Effects</p>
+        <div class="version-info latest">
+            <h3>🚀 Latest Version: v9.0 - Modular Architecture</h3>
+            <p><strong>New:</strong> Organized code structure with separate modules for easy maintenance</p>
+            <p><strong>Benefits:</strong> Faster updates, better organization, improved performance</p>
         </div>
         
         <div class="game-links">
-            <a href="skyworld-sound-inventory.html" class="game-link latest">
-                🎮 Play SkyWorld v8.0 (Recommended)
+            <a href="skyworld-main.html" class="game-link latest">
+                🔧 Play SkyWorld v9.0 - Modular (Recommended)
+            </a>
+            <a href="skyworld-sound-inventory.html" class="game-link">
+                🎵 SkyWorld v8.0 (Sound & Inventory)
             </a>
             <a href="skyworld-physics-visual.html" class="game-link">
                 ⚡ SkyWorld v7.0 (Physics & Visual)
@@ -114,14 +144,23 @@
             <a href="skyworld-block-system.html" class="game-link">
                 🔨 SkyWorld v6.1 (Block System)
             </a>
-            <a href="index.html" class="game-link">
-                📱 Original Version
-            </a>
+        </div>
+        
+        <div class="architecture-info">
+            <h3>🏗️ Modular Architecture Benefits:</h3>
+            <ul>
+                <li>🔧 <strong>Easy Updates:</strong> Modify individual components without touching entire codebase</li>
+                <li>📦 <strong>Better Organization:</strong> Separated concerns for CSS, JS, and components</li>
+                <li>🚀 <strong>Faster Loading:</strong> Load only needed modules</li>
+                <li>🔍 <strong>Easier Debugging:</strong> Isolate issues to specific modules</li>
+                <li>📱 <strong>Better Mobile:</strong> Optimized loading and performance</li>
+            </ul>
         </div>
         
         <div class="features">
-            <h3>🎮 v8.0 Features:</h3>
+            <h3>🎮 v9.0 Features:</h3>
             <ul>
+                <li>🔧 Modular Architecture - Organized code structure</li>
                 <li>🔊 Advanced Audio System - Block sounds & background music</li>
                 <li>📦 Smart Inventory Management - 5x5 grid with stack limits</li>
                 <li>⚡ Physics System - Blocks fall with gravity</li>
@@ -133,6 +172,28 @@
             </ul>
         </div>
         
+        <div class="file-structure">
+            <h4>📁 v9.0 File Structure:</h4>
+            <pre>
+SkyWorld/
+├── skyworld-main.html (Main game)
+├── css/
+│   ├── styles.css (Main styles)
+│   ├── inventory.css (Inventory)
+│   └── particles.css (Effects)
+├── js/
+│   ├── core.js (Game engine)
+│   ├── audio.js (Audio system)
+│   ├── inventory.js (Inventory)
+│   ├── physics.js (Physics)
+│   └── controls.js (Controls)
+└── components/
+    ├── block-system.js
+    ├── island-generator.js
+    └── ui-manager.js
+            </pre>
+        </div>
+        
         <div class="mobile-hint">
             <strong>📱 Mobile Users:</strong><br>
             All versions work on phones! Touch and drag to look around. 
@@ -141,12 +202,19 @@
     </div>
 
     <script>
-        // Auto-redirect to latest version after 5 seconds
+        // Auto-redirect to latest modular version after 5 seconds
         setTimeout(() => {
-            if (confirm('Play the latest SkyWorld v8.0 with all features?')) {
-                window.location.href = 'skyworld-sound-inventory.html';
+            if (confirm('Try the new SkyWorld v9.0 with Modular Architecture? It\'s faster and better organized!')) {
+                window.location.href = 'skyworld-main.html';
             }
         }, 5000);
+        
+        // Show architecture benefits
+        console.log('🏗️ SkyWorld v9.0 Features:');
+        console.log('  ✅ Modular Architecture - Organized code');
+        console.log('  ✅ Easy Updates - Modify individual components');
+        console.log('  ✅ Better Performance - Optimized loading');
+        console.log('  ✅ All Previous Features - Sound, Physics, Inventory, etc.');
     </script>
 </body>
 </html>
