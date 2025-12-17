@@ -15,6 +15,17 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#4a90e2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SkyWorld">
+    <meta name="mobile-web-app-capable" content="yes">
     
     <!-- Styles -->
     <link rel="stylesheet" href="assets/styles.css">
@@ -305,12 +316,65 @@
     <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script> -->
     
     <!-- Service Worker (PWA için) -->
-    <!-- <script>
+    <script>
+        // Service Worker registration for PWA support
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => console.log('SW registered'))
-                .catch(registrationError => console.log('SW registration failed'));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New update available
+                                    console.log('🔄 New version available');
+                                    
+                                    // Show update notification
+                                    if (window.skyWorld?.ui) {
+                                        window.skyWorld.ui.showNotification(
+                                            'Yeni bir güncelleme mevcut. Sayfayı yenileyin.',
+                                            'info'
+                                        );
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(registrationError => {
+                        console.error('❌ Service Worker registration failed:', registrationError);
+                    });
+            });
         }
-    </script> -->
+        
+        // PWA install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button or notification
+            setTimeout(() => {
+                if (window.skyWorld?.ui && deferredPrompt) {
+                    window.skyWorld.ui.showNotification(
+                        'SkyWorld\'ı ana ekranınıza ekleyin!',
+                        'info'
+                    );
+                }
+            }, 10000); // Show after 10 seconds
+        });
+        
+        // PWA install function
+        window.installPWA = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+            }
+        };
+    </script>
 </body>
 </html>
