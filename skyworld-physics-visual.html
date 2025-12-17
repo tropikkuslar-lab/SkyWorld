@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWorld v7.0: Physics & Visual Enhancement</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #welcome-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #4CAF50;
+            z-index: 100;
+        }
+        #start-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        #start-button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 250px;
+            z-index: 50;
+        }
+        .block-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .block-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .block-btn:hover {
+            transform: scale(1.1);
+            border-color: #4CAF50;
+        }
+        .block-btn.active {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+        .block-grass { 
+            background: linear-gradient(135deg, #228B22 0%, #32CD32 50%, #228B22 100%);
+            border: 2px solid #1e5f1e;
+        }
+        .block-stone { 
+            background: linear-gradient(135deg, #696969 0%, #A9A9A9 50%, #696969 100%);
+            border: 2px solid #4f4f4f;
+        }
+        .block-wood { 
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            border: 2px solid #654321;
+        }
+        .block-iron { 
+            background: linear-gradient(135deg, #C0C0C0 0%, #E6E6FA 50%, #C0C0C0 100%);
+            border: 2px solid #808080;
+        }
+        .block-diamond { 
+            background: linear-gradient(135deg, #00FFFF 0%, #87CEEB 50%, #00FFFF 100%);
+            border: 2px solid #00BFFF;
+        }
+        .block-lava { 
+            background: linear-gradient(135deg, #FF4500 0%, #FF6347 50%, #FF4500 100%);
+            border: 2px solid #FF0000;
+        }
+        .inventory-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 50;
+        }
+        .time-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            z-index: 50;
+        }
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 50;
+            font-size: 12px;
+        }
+        .physics-info {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 50;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #4CAF50;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 40;
+            animation: particleFloat 1s ease-out forwards;
+        }
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="welcome-message">
+            <h1>🏝️ SkyWorld v7.0</h1>
+            <h2>Physics & Visual Enhancement</h2>
+            <p>⚡ Advanced Physics System<br>
+            🎨 Enhanced Visual Effects<br>
+            🔨 Block System<br>
+            🌅 Day/Night Cycle<br>
+            📦 Inventory System</p>
+            <button id="start-button">Start Playing!</button>
+        </div>
+        
+        <div class="ui-panel" id="block-panel" style="display: none;">
+            <h3>🔨 Block Selection</h3>
+            <p>Click a block to select</p>
+            <div class="block-selector">
+                <div class="block-btn block-grass active" data-block="grass" title="Grass Block"></div>
+                <div class="block-btn block-stone" data-block="stone" title="Stone Block"></div>
+                <div class="block-btn block-wood" data-block="wood" title="Wood Block"></div>
+                <div class="block-btn block-iron" data-block="iron" title="Iron Block"></div>
+                <div class="block-btn block-diamond" data-block="diamond" title="Diamond Block"></div>
+                <div class="block-btn block-lava" data-block="lava" title="Lava Block"></div>
+            </div>
+        </div>
+        
+        <div class="inventory-panel" id="inventory-panel" style="display: none;">
+            <h3>📦 Inventory</h3>
+            <div id="inventory-content">
+                <p>Grass: <span id="grass-count">10</span></p>
+                <p>Stone: <span id="stone-count">5</span></p>
+                <p>Wood: <span id="wood-count">3</span></p>
+                <p>Iron: <span id="iron-count">1</span></p>
+                <p>Diamond: <span id="diamond-count">0</span></p>
+                <p>Lava: <span id="lava-count">2</span></p>
+            </div>
+        </div>
+        
+        <div class="time-display" id="time-display" style="display: none;">
+            <span id="time-text">Day 1 - 12:00</span>
+        </div>
+        
+        <div class="physics-info" id="physics-info" style="display: none;">
+            <strong>⚡ Physics:</strong><br>
+            <span id="gravity-status">Gravity: ON</span><br>
+            <span id="falling-blocks">Falling: 0</span>
+        </div>
+        
+        <div class="controls-hint" id="controls-hint" style="display: none;">
+            <strong>🎮 Controls:</strong><br>
+            <strong>Desktop:</strong> WASD movement, Mouse look<br>
+            <strong>Mobile:</strong> Touch & drag to look<br>
+            <strong>Blocks:</strong> Click blocks to select, click empty space to place<br>
+            <strong>Physics:</strong> Blocks fall with gravity!
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // SkyWorld v7.0 Game Variables
+        let scene, camera, renderer;
+        let islands = [];
+        let placedBlocks = [];
+        let fallingBlocks = []; // NEW: Physics system
+        let timeOfDay = 12; // 0-24 hours
+        let dayNumber = 1;
+        let selectedBlockType = 'grass';
+        let player = { x: 0, y: 8, z: 0 };
+        let gameStarted = false;
+        let physicsEnabled = true; // NEW: Physics toggle
+        
+        // Block types with enhanced properties
+        const blockTypes = {
+            grass: { 
+                color: 0x228B22, 
+                name: 'Grass',
+                hasTexture: true,
+                density: 0.8,
+                breakable: true
+            },
+            stone: { 
+                color: 0x696969, 
+                name: 'Stone',
+                hasTexture: true,
+                density: 2.5,
+                breakable: true
+            },
+            wood: { 
+                color: 0x8B4513, 
+                name: 'Wood',
+                hasTexture: true,
+                density: 0.6,
+                breakable: true
+            },
+            iron: { 
+                color: 0xC0C0C0, 
+                name: 'Iron',
+                hasTexture: true,
+                density: 7.8,
+                breakable: false
+            },
+            diamond: { 
+                color: 0x00FFFF, 
+                name: 'Diamond',
+                hasTexture: true,
+                density: 3.5,
+                breakable: false
+            },
+            lava: { 
+                color: 0xFF4500, 
+                name: 'Lava',
+                hasTexture: true,
+                density: 2.8,
+                breakable: true,
+                emissive: true
+            }
+        };
+
+        // Initialize Game
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 SkyWorld v7.0: Physics & Visual Enhancement - Initializing...');
+            
+            const startButton = document.getElementById('start-button');
+            const welcomeMessage = document.getElementById('welcome-message');
+            
+            startButton.addEventListener('click', function() {
+                welcomeMessage.style.display = 'none';
+                document.getElementById('block-panel').style.display = 'block';
+                document.getElementById('inventory-panel').style.display = 'block';
+                document.getElementById('time-display').style.display = 'block';
+                document.getElementById('physics-info').style.display = 'block';
+                document.getElementById('controls-hint').style.display = 'block';
+                initializeGame();
+            });
+            
+            setupBlockSelection();
+        });
+
+        function setupBlockSelection() {
+            const blockButtons = document.querySelectorAll('.block-btn');
+            blockButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    blockButtons.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Update selected block type
+                    selectedBlockType = this.dataset.block;
+                    console.log(`🔨 Selected block: ${selectedBlockType}`);
+                });
+            });
+        }
+
+        function initializeGame() {
+            gameStarted = true;
+            
+            // Initialize Three.js Scene
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x87CEEB); // Enhanced sky
+            document.getElementById('game-container').appendChild(renderer.domElement);
+            
+            // Enhanced lighting with day/night
+            updateLighting();
+            
+            // Create floating islands system
+            createFloatingIslands();
+            createSkyBridges();
+            createAerialStructures();
+            
+            // Set camera position on starting island
+            camera.position.set(player.x, player.y + 5, player.z + 10);
+            camera.lookAt(player.x, player.y, player.z);
+            
+            // Setup controls
+            setupControls();
+            setupBlockPlacement();
+            
+            // Animation loop with physics
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Update time of day
+                updateTimeOfDay();
+                
+                // Update physics
+                updatePhysics();
+                
+                // Rotate islands slightly for visual effect
+                islands.forEach(island => {
+                    island.rotation.y += 0.001;
+                });
+                
+                // Update block animations
+                updateBlockAnimations();
+                
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            console.log('✅ SkyWorld v7.0 initialized with Physics & Visual Enhancement!');
+            console.log('⚡ Advanced Physics System Active');
+            console('🎨 Enhanced Visual Effects Enabled');
+        }
+
+        // NEW: Physics System
+        function updatePhysics() {
+            if (!physicsEnabled) return;
+            
+            const gravity = 0.5;
+            const blocksToRemove = [];
+            
+            fallingBlocks.forEach((block, index) => {
+                // Apply gravity
+                block.velocity.y -= gravity;
+                
+                // Update position
+                block.mesh.position.y += block.velocity.y;
+                
+                // Check for ground collision
+                const groundY = findGroundLevel(block.mesh.position.x, block.mesh.position.z);
+                
+                if (block.mesh.position.y <= groundY + 0.5) {
+                    // Land the block
+                    block.mesh.position.y = groundY + 0.5;
+                    block.velocity.y = 0;
+                    
+                    // Check if block should stop falling
+                    const supportBlocks = getSupportBlocks(block.mesh.position);
+                    if (supportBlocks.length > 0) {
+                        // Move block to placedBlocks
+                        placedBlocks.push(block.mesh);
+                        fallingBlocks.splice(index, 1);
+                        
+                        // Create landing particles
+                        createParticles(block.mesh.position.x, block.mesh.position.y, block.mesh.position.z, 'land');
+                        
+                        console.log(`📦 Block landed at (${block.mesh.position.x}, ${block.mesh.position.y}, ${block.mesh.position.z})`);
+                    }
+                }
+                
+                // Remove blocks that fall too far
+                if (block.mesh.position.y < -50) {
+                    blocksToRemove.push(index);
+                }
+            });
+            
+            // Remove fallen blocks
+            blocksToRemove.forEach(index => {
+                scene.remove(fallingBlocks[index].mesh);
+                fallingBlocks.splice(index, 1);
+            });
+            
+            // Update physics info display
+            document.getElementById('falling-blocks').textContent = `Falling: ${fallingBlocks.length}`;
+        }
+
+        function findGroundLevel(x, z) {
+            // Find the highest solid surface at given x,z coordinates
+            let groundLevel = -10; // Void level
+            
+            // Check placed blocks
+            placedBlocks.forEach(block => {
+                const pos = block.position;
+                if (Math.abs(pos.x - x) < 0.6 && Math.abs(pos.z - z) < 0.6) {
+                    groundLevel = Math.max(groundLevel, pos.y + 0.5);
+                }
+            });
+            
+            // Check falling blocks
+            fallingBlocks.forEach(block => {
+                const pos = block.mesh.position;
+                if (Math.abs(pos.x - x) < 0.6 && Math.abs(pos.z - z) < 0.6) {
+                    groundLevel = Math.max(groundLevel, pos.y + 0.5);
+                }
+            });
+            
+            // Check islands
+            islands.forEach(island => {
+                const pos = island.position;
+                if (Math.abs(pos.x - x) < island.geometry.parameters.radiusTop * 1.2 && 
+                    Math.abs(pos.z - z) < island.geometry.parameters.radiusTop * 1.2) {
+                    groundLevel = Math.max(groundLevel, pos.y + 1);
+                }
+            });
+            
+            return groundLevel;
+        }
+
+        function getSupportBlocks(position) {
+            const supportBlocks = [];
+            
+            // Check if there are blocks below
+            const checkY = position.y - 1;
+            const checkX = position.x;
+            const checkZ = position.z;
+            
+            placedBlocks.forEach(block => {
+                if (Math.abs(block.position.x - checkX) < 0.6 &&
+                    Math.abs(block.position.y - checkY) < 0.6 &&
+                    Math.abs(block.position.z - checkZ) < 0.6) {
+                    supportBlocks.push(block);
+                }
+            });
+            
+            return supportBlocks;
+        }
+
+        // NEW: Visual Enhancement - Particle System
+        function createParticles(x, y, z, type) {
+            const particleCount = type === 'place' ? 5 : 8;
+            const colors = {
+                place: ['#4CAF50', '#8BC34A', '#CDDC39'],
+                land: ['#FF9800', '#FFC107', '#FFEB3B']
+            };
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = colors[type][Math.floor(Math.random() * colors[type].length)];
+                particle.style.left = (x * 20 + window.innerWidth / 2) + 'px';
+                particle.style.top = (y * 20 + window.innerHeight / 2) + 'px';
+                
+                // Random offset
+                const offsetX = (Math.random() - 0.5) * 100;
+                const offsetY = (Math.random() - 0.5) * 100;
+                particle.style.transform += ` translate(${offsetX}px, ${offsetY}px)`;
+                
+                document.getElementById('game-container').appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 1000);
+            }
+        }
+
+        function updateBlockAnimations() {
+            // Add subtle animations to special blocks
+            placedBlocks.forEach(block => {
+                if (block.userData.blockType === 'lava') {
+                    // Lava block pulsing effect
+                    const material = block.material;
+                    if (material.emissive) {
+                        material.emissive.setHex(0xFF4500 + Math.sin(Date.now() * 0.003) * 0x100000);
+                    }
+                }
+            });
+        }
+
+        function updateLighting() {
+            // Remove existing lights
+            const existingLights = scene.children.filter(child => child.isLight);
+            existingLights.forEach(light => scene.remove(light));
+            
+            // Calculate light intensity based on time
+            const timeFactor = Math.sin((timeOfDay / 24) * Math.PI * 2) * 0.5 + 0.5; // 0 to 1
+            
+            // Enhanced ambient light
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3 + timeFactor * 0.4);
+            scene.add(ambientLight);
+            
+            // Enhanced directional light (sun/moon)
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8 * timeFactor + 0.2);
+            directionalLight.position.set(50 * timeFactor, 50, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 200;
+            directionalLight.shadow.camera.left = -50;
+            directionalLight.shadow.camera.right = 50;
+            directionalLight.shadow.camera.top = 50;
+            directionalLight.shadow.camera.bottom = -50;
+            scene.add(directionalLight);
+            
+            // Add some point lights for special effects
+            placedBlocks.forEach(block => {
+                if (block.userData.blockType === 'lava' && block.material.emissive) {
+                    const lavaLight = new THREE.PointLight(0xFF4500, 0.5, 10);
+                    lavaLight.position.copy(block.position);
+                    scene.add(lavaLight);
+                }
+            });
+            
+            // Enhanced sky color
+            const skyColor = new THREE.Color().lerpColors(
+                new THREE.Color(0x000011), // Night blue
+                new THREE.Color(0x87CEEB), // Day blue
+                timeFactor
+            );
+            renderer.setClearColor(skyColor);
+        }
+
+        function updateTimeOfDay() {
+            if (!gameStarted) return;
+            
+            timeOfDay += 0.02; // Speed of time progression
+            
+            if (timeOfDay >= 24) {
+                timeOfDay = 0;
+                dayNumber++;
+            }
+            
+            // Update lighting
+            updateLighting();
+            
+            // Update display
+            const hours = Math.floor(timeOfDay);
+            const minutes = Math.floor((timeOfDay % 1) * 60);
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            document.getElementById('time-text').textContent = `Day ${dayNumber} - ${timeString}`;
+        }
+
+        function createFloatingIslands() {
+            const islandData = [
+                { x: -10, y: 8, z: -5, radius: 3, color: 0x228B22, name: 'Forest Island' },
+                { x: 15, y: 12, z: 8, radius: 4, color: 0x8B4513, name: 'Mountain Island' },
+                { x: -5, y: 6, z: 12, radius: 2, color: 0x32CD32, name: 'Grass Island' },
+                { x: 8, y: 15, z: -12, radius: 5, color: 0xFF8C00, name: 'Desert Island' },
+                { x: 18, y: 9, z: -3, radius: 3, color: 0x9ACD32, name: 'Meadow Island' },
+                { x: -15, y: 14, z: 10, radius: 4, color: 0x20B2AA, name: 'Ocean Island' }
+            ];
+            
+            islandData.forEach((island, index) => {
+                // Create enhanced island base with texture
+                const geometry = new THREE.CylinderGeometry(island.radius, island.radius * 1.2, 2, 12);
+                const material = new THREE.MeshLambertMaterial({ 
+                    color: island.color,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const islandMesh = new THREE.Mesh(geometry, material);
+                
+                islandMesh.position.set(island.x, island.y, island.z);
+                islandMesh.userData = { type: 'island', name: island.name };
+                islandMesh.castShadow = true;
+                islandMesh.receiveShadow = true;
+                scene.add(islandMesh);
+                islands.push(islandMesh);
+                
+                // Add enhanced island top with gradient
+                const topGeometry = new THREE.CylinderGeometry(island.radius * 0.9, island.radius * 0.9, 0.3, 12);
+                const topMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x228B22,
+                    emissive: 0x001100
+                });
+                const topMesh = new THREE.Mesh(topGeometry, topMaterial);
+                topMesh.position.set(island.x, island.y + 1.15, island.z);
+                topMesh.castShadow = true;
+                topMesh.receiveShadow = true;
+                scene.add(topMesh);
+                
+                // Add some natural blocks on the island
+                addNaturalBlocks(island.x, island.y + 1.5, island.z, island.radius);
+                
+                console.log(`🏝️ ${island.name} created with enhanced visuals`);
+            });
+        }
+
+        function addNaturalBlocks(centerX, centerY, centerZ, radius) {
+            // Add some trees and rocks with enhanced visuals
+            for (let i = 0; i < Math.floor(radius * 2); i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * radius * 0.8;
+                const x = centerX + Math.cos(angle) * distance;
+                const z = centerZ + Math.sin(angle) * distance;
+                const y = centerY + 0.2;
+                
+                if (Math.random() > 0.5) {
+                    // Add enhanced trees
+                    createBlock(x, y, z, 'wood');
+                    createBlock(x, y + 1, z, 'wood');
+                    createBlock(x, y + 2, z, 'wood');
+                    // Add enhanced leaves
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dz = -1; dz <= 1; dz++) {
+                            createBlock(x + dx, y + 3, z + dz, 'grass');
+                        }
+                    }
+                } else {
+                    // Add enhanced rocks
+                    createBlock(x, y, z, 'stone');
+                    if (Math.random() > 0.5) {
+                        createBlock(x, y + 1, z, 'stone');
+                    }
+                }
+            }
+        }
+
+        function createSkyBridges() {
+            const bridges = [
+                { start: [-10, 10, -5], end: [15, 14, 8], color: 0x8B4513 },
+                { start: [-5, 8, 12], end: [18, 11, -3], color: 0x8B4513 },
+                { start: [-10, 10, -5], end: [-10, 15, -5], color: 0x8B4513 }
+            ];
+            
+            bridges.forEach((bridge, index) => {
+                const [startX, startY, startZ] = bridge.start;
+                const [endX, endY, endZ] = bridge.end;
+                
+                const length = Math.sqrt(
+                    Math.pow(endX - startX, 2) + 
+                    Math.pow(endY - startY, 2) + 
+                    Math.pow(endZ - startZ, 2)
+                );
+                
+                const midX = (startX + endX) / 2;
+                const midY = (startY + endY) / 2;
+                const midZ = (startZ + endZ) / 2;
+                
+                const geometry = new THREE.BoxGeometry(length, 0.5, 1);
+                const material = new THREE.MeshLambertMaterial({ 
+                    color: bridge.color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const bridgeMesh = new THREE.Mesh(geometry, material);
+                
+                bridgeMesh.position.set(midX, midY, midZ);
+                bridgeMesh.userData = { type: 'bridge', index: index };
+                bridgeMesh.castShadow = true;
+                scene.add(bridgeMesh);
+                
+                console.log(`🌉 Bridge ${index + 1} with enhanced visuals created`);
+            });
+        }
+
+        function createAerialStructures() {
+            // Enhanced Floating Castle
+            const castleGeometry = new THREE.BoxGeometry(6, 8, 6);
+            const castleMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x696969,
+                transparent: true,
+                opacity: 0.9
+            });
+            const castle = new THREE.Mesh(castleGeometry, castleMaterial);
+            castle.position.set(20, 18, 0);
+            castle.userData = { type: 'castle', name: 'Sky Castle' };
+            castle.castShadow = true;
+            scene.add(castle);
+            
+            // Enhanced Floating Tower
+            const towerGeometry = new THREE.CylinderGeometry(2, 2, 15, 8);
+            const towerMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x778899,
+                transparent: true,
+                opacity: 0.9
+            });
+            const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+            tower.position.set(-20, 22, 15);
+            tower.userData = { type: 'tower', name: 'Sky Tower' };
+            tower.castShadow = true;
+            scene.add(tower);
+            
+            // Enhanced Floating Pyramid
+            const pyramidGeometry = new THREE.ConeGeometry(5, 8, 4);
+            const pyramidMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xDAA520,
+                transparent: true,
+                opacity: 0.9
+            });
+            const pyramid = new THREE.Mesh(pyramidGeometry, pyramidMaterial);
+            pyramid.position.set(0, 16, -18);
+            pyramid.userData = { type: 'pyramid', name: 'Sky Pyramid' };
+            pyramid.castShadow = true;
+            scene.add(pyramid);
+            
+            console.log('🏰 Enhanced aerial structures created: Castle, Tower, Pyramid');
+        }
+
+        function createBlock(x, y, z, blockType) {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshLambertMaterial({ 
+                color: blockTypes[blockType].color,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            // Add emissive properties for special blocks
+            if (blockTypes[blockType].emissive) {
+                material.emissive = new THREE.Color(blockTypes[blockType].color);
+                material.emissiveIntensity = 0.2;
+            }
+            
+            const blockMesh = new THREE.Mesh(geometry, material);
+            
+            blockMesh.position.set(x, y, z);
+            blockMesh.userData = { type: 'block', blockType: blockType };
+            blockMesh.castShadow = true;
+            blockMesh.receiveShadow = true;
+            
+            scene.add(blockMesh);
+            placedBlocks.push(blockMesh);
+            
+            // Create placement particles
+            createParticles(x, y, z, 'place');
+            
+            return blockMesh;
+        }
+
+        function setupControls() {
+            // Enhanced keyboard controls
+            document.addEventListener('keydown', function(event) {
+                if (!gameStarted) return;
+                
+                const speed = 1;
+                switch(event.code) {
+                    case 'KeyW':
+                    case 'ArrowUp':
+                        player.z -= speed;
+                        break;
+                    case 'KeyS':
+                    case 'ArrowDown':
+                        player.z += speed;
+                        break;
+                    case 'KeyA':
+                    case 'ArrowLeft':
+                        player.x -= speed;
+                        break;
+                    case 'KeyD':
+                    case 'ArrowRight':
+                        player.x += speed;
+                        break;
+                    case 'KeyP': // Toggle physics
+                        physicsEnabled = !physicsEnabled;
+                        document.getElementById('gravity-status').textContent = `Gravity: ${physicsEnabled ? 'ON' : 'OFF'}`;
+                        console.log(`⚡ Physics ${physicsEnabled ? 'enabled' : 'disabled'}`);
+                        break;
+                }
+                
+                camera.position.x = player.x;
+                camera.position.z = player.z + 10;
+                camera.lookAt(player.x, player.y, player.z);
+            });
+            
+            // Enhanced mouse controls
+            let mouseDown = false;
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+            
+            renderer.domElement.addEventListener('mousedown', function(event) {
+                if (!gameStarted) return;
+                mouseDown = true;
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+            });
+            
+            document.addEventListener('mouseup', function() {
+                mouseDown = false;
+            });
+            
+            document.addEventListener('mousemove', function(event) {
+                if (!gameStarted) return;
+                
+                if (mouseDown) {
+                    const deltaX = event.clientX - lastMouseX;
+                    const deltaY = event.clientY - lastMouseY;
+                    
+                    camera.rotation.y -= deltaX * 0.01;
+                    camera.rotation.x -= deltaY * 0.01;
+                    
+                    lastMouseX = event.clientX;
+                    lastMouseY = event.clientY;
+                }
+            });
+        }
+
+        function setupBlockPlacement() {
+            renderer.domElement.addEventListener('click', function(event) {
+                if (!gameStarted) return;
+                
+                const mouse = new THREE.Vector2();
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(scene.children);
+                
+                if (intersects.length > 0) {
+                    const intersect = intersects[0];
+                    const point = intersect.point;
+                    
+                    // Place block slightly away from the surface
+                    const normal = intersect.face.normal.clone();
+                    const placementPoint = point.clone().add(normal.multiplyScalar(0.5));
+                    
+                    // Round to grid
+                    placementPoint.x = Math.round(placementPoint.x);
+                    placementPoint.y = Math.round(placementPoint.y);
+                    placementPoint.z = Math.round(placementPoint.z);
+                    
+                    // Create block with physics
+                    const newBlock = createBlock(placementPoint.x, placementPoint.y, placementPoint.z, selectedBlockType);
+                    
+                    // Check if block should fall (physics enabled and not on ground)
+                    const groundLevel = findGroundLevel(placementPoint.x, placementPoint.z);
+                    const supportBlocks = getSupportBlocks(placementPoint);
+                    
+                    if (physicsEnabled && supportBlocks.length === 0 && placementPoint.y > groundLevel + 0.5) {
+                        // Block starts falling
+                        const fallingBlock = {
+                            mesh: newBlock,
+                            velocity: { x: 0, y: 0, z: 0 },
+                            blockType: selectedBlockType
+                        };
+                        
+                        // Remove from placedBlocks
+                        const index = placedBlocks.indexOf(newBlock);
+                        if (index > -1) {
+                            placedBlocks.splice(index, 1);
+                        }
+                        
+                        fallingBlocks.push(fallingBlock);
+                        console.log(`🔨 ${selectedBlockType} block will fall due to gravity`);
+                    }
+                    
+                    console.log(`🔨 Placed ${selectedBlockType} block at (${placementPoint.x}, ${placementPoint.y}, ${placementPoint.z})`);
+                }
+            });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>
